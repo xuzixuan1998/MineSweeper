@@ -12,37 +12,58 @@ class MineSweeper:
             self.state = state
 
     def __init__(self):
-        self.width = 9
-        self.height = 9
-        
-
-    def open(self):
         self.root = Tk()
         self.root.title('MineSweeper')
 
         # set the position of the window to the center of the screen
         self.root.resizable(False, False)
 
-        self.start()
+        # Create menu for choosing level
+        menubar = Menu(self.root)
+        self.root.config(menu=menubar)
         
+        def setlevel(self, level):
+            if level == 1:
+                self.width = 9
+                self.height = 9
+                self.minenum = 10
+            elif level == 2:
+                self.width = 16
+                self.height = 16
+                self.minenum = 40
+            else:
+                self.width = 30
+                self.height = 16
+                self.minenum = 99  
+            self.start()             
+        # create the file_menu
+        level_menu = Menu(
+            menubar,
+            tearoff=0
+        )
+        level_menu.add_command(label='Beginner', command=lambda: setlevel(self, 1))
+        level_menu.add_command(label='Intermediate', command=lambda: setlevel(self, 2))
+        level_menu.add_command(label='Expert', command=lambda: setlevel(self, 3))
+        menubar.add_cascade(label="Level", menu=level_menu)
+                                    
         self.root.mainloop()
     
+
     def start(self):
-        self.minenum = 10
         self.rest = self.minenum
 
         # create Label
         self.label = Label(self.root, text="Mine Number:"+str(self.rest))
-        self.label.grid(column=0, row=0, columnspan=9, sticky=W, padx=5, pady=5)
+        self.label.grid(column=0, row=0, columnspan=self.width, sticky=W, padx=5, pady=5)
 
         # initiate mines
-        mines = random.sample(range(0,81), 10)
-        self.mine = [(i%9, i//9)for i in mines]
+        mines = random.sample(range(0,self.width*self.height), self.minenum)
+        self.mine = [(i%self.width, i//self.height)for i in mines]
 
         # create Button
         self.buttons = {}
-        for x in range(9):
-            for y in range(9):
+        for x in range(self.width):
+            for y in range(self.height):
                 self.buttons[(x, y)] = self.Mine(self.root, (x, y), 0, font=('song ti', 12, 'bold'), width=2, height=2, bd=1)
                 self.buttons[(x, y)].bind('<ButtonRelease-1>',lambda event:self.left(event.widget))
                 self.buttons[(x, y)].bind('<ButtonRelease-3>',lambda event:self.right(event.widget))
@@ -92,9 +113,9 @@ class MineSweeper:
                 self.buttons[(x,y)].configure(text='☼', fg='red')
             # show the button to restart
             self.show_message(False)
+        # expand a whole area that don't have mine in it
         else:
             self.open_rec(button.xy)
-            # expand a whole area that don't have mine in it
 
     def right(self, button):   
         if button.state == 0 and self.rest > 0:
@@ -129,4 +150,3 @@ class MineSweeper:
 
 if __name__ == '__main__':
     game = MineSweeper()
-    game.open()
